@@ -4,6 +4,7 @@ import logging
 import time
 
 from .TUIEvents import TUIInputEvent, TUIInputEventReactor
+from .EventBus import EventBus
 from .TUIElements import TUIWindowElement
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class TUI:
         self.writeLock = threading.Lock()
         self.readLock = threading.Lock()
         self.takingInput = True
-        self.keyEventBus = []
+        self.keyEventBus = EventBus(logger=logger)
         self.SubscibeToKeypress(TUIInputEventReactor(self.DefaultKeyHandler))
 
         self.cursor_x = 0
@@ -65,9 +66,8 @@ class TUI:
     def SubscibeToKeypress(self, reactor : TUIInputEventReactor):
         """
         Reactor is a single argument function
-        with the parameter as the key
         """
-        self.keyEventBus.append(reactor)
+        self.keyEventBus += reactor
 
     def KeyPressMain(self):
         logger.info("Key press thread started")
@@ -81,18 +81,8 @@ class TUI:
 
                 inputEvent = TUIInputEvent(ch)
 
-                for reactor in self.keyEventBus:
-                    try:
-                        reactor(inputEvent)
-                    except Exception as e:
-                        # Log
-                        logger.warn(
-                            "Reactor error on reactor " +
-                            str(reactor) +
-                            " and input " +
-                            str(ch) +
-                            f"\nError: {e}"
-                        )
+                self.keyEventBus(inputEvent)
+
         except Exception as e:
             import traceback
             logger.error(f"Key press handler crashed with error {e}")
