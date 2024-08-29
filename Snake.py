@@ -16,6 +16,7 @@ class SnakePiece:
         self.position = position
         self.direction = direction
         self.isHead = isHead
+        
 
     def __str__(self):
         if self.isHead:
@@ -32,7 +33,7 @@ class SnakeGame:
 
     FRUIT = "◍"
 
-    def __init__(self, x_max : int, y_max : int):
+    def __init__(self, x_max : int, y_max : int, stepTime : float = 0.07):
         self.max = (x_max, y_max)
 
         head = SnakePiece((x_max//2, y_max//2), Direction.RIGHT, True)
@@ -43,12 +44,25 @@ class SnakeGame:
 
         self.inputDirection = None
 
+        self.stepTime = stepTime
+        self.timeElapsed = 0
+
+
     def Turn(self, direction : Direction):
         self.inputDirection = direction
         
-    def Update(self):
-        self.UpdateSnake()
+    def Update(self, dt : float):
+        self.UpdateSnake(dt)
         self.UpdateFruit()
+        self.HandleTailCut()
+
+    def HandleTailCut(self):
+        head = self.snake[0]
+
+        for i in range(len(self.snake) - 1):
+            if head.position == self.snake[i+1].position:
+                self.snake = self.snake[:i]
+                return
 
     def Wrap(self, pos : vector) -> vector:
         x, y = pos
@@ -56,7 +70,12 @@ class SnakeGame:
 
         return (x%x_max, y%y_max)
 
-    def UpdateSnake(self):
+    def UpdateSnake(self, dt : float):
+        self.timeElapsed += dt
+
+        stepTime = self.stepTime
+
+
         head = self.snake[0]
 
         x, y = head.position
@@ -64,10 +83,17 @@ class SnakeGame:
         newDirection = head.direction
 
         if self.inputDirection:
+            if newDirection == self.inputDirection:
+                stepTime = stepTime/3
             if sum(map(lambda t: abs(t[0] + t[1]), zip(self.inputDirection, head.direction))):
                 dx, dy = self.inputDirection
                 newDirection = self.inputDirection
 
+        
+        if self.timeElapsed < stepTime:
+            return
+        self.timeElapsed = 0
+        self.inputDirection = None
 
         x_new, y_new = self.Wrap((x + dx, y + dy))
 

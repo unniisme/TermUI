@@ -154,23 +154,29 @@ class TUI:
         self.Elements.append(element)
         element.Rerender = self.Rerender
 
+        self.SubscibeToKeypress(element.InputEventHandler)
+
     def Init(self):
 
         ColorPairs.Init()
 
         # Set up input mode
+        curses.curs_set(1)
         curses.raw()         # Disable line buffering
         curses.noecho()      # Do not display input characters
         self.stdscr.nodelay(1)    # Non blocking input
         self.stdscr.keypad(True)  # Enable special keys (e.g., arrow keys)
 
+        # Init each element
         for element in self.Elements:
             element.Init()
 
+        # Start thread for handling input
         self.keyThread = threading.Thread(target=self.KeyPressMain)
         self.keyThread.daemon = True
         self.keyThread.start()
 
+        # Start thread for handling rendering
         self.renderThread = threading.Thread(target=self.RenderMain)
         self.renderThread.daemon = True
         self.renderThread.start()

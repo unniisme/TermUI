@@ -1,4 +1,5 @@
-from .TUIElement import TUIScreen, TUIElement
+from .TUIElement import TUIElement
+from .TUIEvents import TUIInputEvent
 import curses
 
 class TUIWindowElement(TUIElement):
@@ -37,5 +38,11 @@ class TUIWindowElement(TUIElement):
     def Rerender(self):
         """
         Call when ui is updated
+        """
+        pass
+
+    def InputEventHandler(self, event : TUIInputEvent):
+        """
+        Override to handler input
         """
         pass

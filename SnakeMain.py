@@ -8,13 +8,10 @@ x_mult = 2
 
 class SnakeGameTUI(TUIWindowElement):
 
-    def __init__(self, *args, stepTime=0.07, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.game : SnakeGame = None
-        self.time = 0
-        self.stepTime = stepTime
-        self.doubleSpeed = False
 
     def Init(self):
         super().Init()
@@ -23,13 +20,8 @@ class SnakeGameTUI(TUIWindowElement):
 
     
     def main(self, dt):
-        self.time += dt
-    
-        if ((self.time >= self.stepTime)
-            or (self.time >= self.stepTime/3 and self.doubleSpeed)):
-            self.game.Update()
-            self.Rerender()
-            self.time = 0
+        self.game.Update(dt)
+        self.Rerender()
 
     def InputEventHandler(self, event : TUIInputEvent):
         cases = {
@@ -63,10 +55,9 @@ class SnakeGameTUI(TUIWindowElement):
 
 if __name__ == "__main__":
     tui = TUI()
-    game = SnakeGameTUI(0, 0, 30, 30, drawBorder = True)
+    game = SnakeGameTUI(10, 10, 40, 20, drawBorder = True)
 
     tui.AddElement(game)
-    tui.SubscibeToKeypress(game.InputEventHandler)
 
     curses.wrapper(tui.main)
     
