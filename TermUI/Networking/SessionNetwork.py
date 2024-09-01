@@ -95,12 +95,12 @@ class SessionServer(Network.Server):
 
     def SendMessageToSession(self, sID, message : str):
         if sID not in self.sessions:
-            return
+            logging.warn(f"Sending to unknows sID : {sID}")
         
         clientAddr = self.sessions[sID].clientAddr
         msg = Message(
             UAP.CommandEnum.DATA,
-            -1,
+            0,
             sID,
             message
         )

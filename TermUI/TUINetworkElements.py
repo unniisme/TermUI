@@ -1,5 +1,4 @@
 from .Networking.SessionNetwork import SessionServer, SessionClient
-from TermUI.EventBus import EventBus
 from .TUIElements import TUIWindowElement
 from .TUI import logger
 import threading
@@ -72,6 +71,7 @@ class ClientElement(TUIWindowElement):
 
     def UpdateMessageBuffer(self, msg):
         self.buffer = msg
+        self.Rerender()
 
     def Init(self):
         super().Init()
@@ -83,7 +83,7 @@ class ClientElement(TUIWindowElement):
     def Render(self):
         if self.drawBorder: self.window.border()
         _, max_x = self.window.getmaxyx()
-        self.window.addnstr(0, 0, f"Connected to {self.client.host}:{self.client.port}")
+        self.window.addnstr(0, 0, f"Connected to {self.client.host}:{self.client.port}", max_x)
         self.window.addnstr(1, 0, self.buffer, max_x)
         
 

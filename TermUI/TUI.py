@@ -95,6 +95,7 @@ class TUI:
         if event.key == 4:
             logger.info("EOL")
             self.running = False
+            self.takingInput = False
         if event.key == ord("i"):
             ColorPairs.Invert()  
             self.Rerender()
@@ -185,3 +186,6 @@ class TUI:
         except Exception as e:
             logging.error(f"Main thread crashed with error {e}")
             raise e
+        
+        self.stdscr.clear()
+        curses.endwin()
