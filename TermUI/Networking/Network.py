@@ -110,11 +110,11 @@ class Client:
 
         while self.running:
             try:
-                msg = self.queue.get(block=False)
+                msg = self.queue.get(block=True)
             except Empty:
                 continue
             self._SendPacket(msg)
-        self.Exit(force=True)
+        self.Exit()
 
     def Exit(self, force = False):
         """
@@ -123,7 +123,9 @@ class Client:
         self.recieving = False
         self.running = False
         if not force:
-            self.queue.join()
+            while not self.queue.empty():
+                msg = self.queue.get()
+                self._SendPacket(msg)
 
         self.client_socket.close()
         self.recieverThread.join()

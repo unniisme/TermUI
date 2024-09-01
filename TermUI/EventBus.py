@@ -10,7 +10,7 @@ class EventBus:
             except Exception as e:
                 exc = EventBusException("", self, f, e)
                 if self.logger:
-                    self.logger.log(str(exc))
+                    self.logger.error(str(exc))
                 else:
                     raise exc
 

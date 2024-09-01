@@ -151,7 +151,7 @@ class TUI:
         ColorPairs.Init()
 
         # Set up input mode
-        curses.curs_set(1)
+        curses.curs_set(0)
         curses.raw()         # Disable line buffering
         curses.noecho()      # Do not display input characters
         self.stdscr.nodelay(1)    # Non blocking input

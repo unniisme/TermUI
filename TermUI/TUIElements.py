@@ -75,12 +75,15 @@ class TextElement(TUIWindowElement):
         _, width = self.window.getmaxyx()
 
         n = len(self.text)
+        i = 0
 
         if self.horizontalAlignment == TextElement.Alignment.LEFT:
             text = self.text[:width]
         elif self.horizontalAlignment == TextElement.Alignment.RIGHT:
             text = self.text[-width:]
+            i = width - n
         elif self.horizontalAlignment == TextElement.Alignment.CENTRE:
-            text = self.text[(n-width)//2, (n+width)//2]
+            text = self.text[(n-width)//2:(n+width)//2]
+            i = (width - n)//2
 
-        self.window.addnstr(text, width)
+        self.window.addnstr(0, i , text, width)

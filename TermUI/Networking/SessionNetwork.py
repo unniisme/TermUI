@@ -89,6 +89,7 @@ class SessionServer(Network.Server):
             self.sessions[msg.sID].queue.put(msg.message)
 
         elif msg.command == UAP.CommandEnum.GOODBYE:
+            self.logger.info(f"Session {msg.sID} closing")
             self.sessions[msg.sID].Exit()
             self.sessionCloseEvent(msg.sID)
 
@@ -97,7 +98,14 @@ class SessionServer(Network.Server):
             return
         
         clientAddr = self.sessions[sID].clientAddr
-        pass
+        msg = Message(
+            UAP.CommandEnum.DATA,
+            -1,
+            sID,
+            message
+        )
+
+        self.server_socket.sendto(msg.EncodeMessage(), clientAddr)
 
 
 class SessionClient(Network.Client):
@@ -168,7 +176,10 @@ class SessionClient(Network.Client):
             elif msg.command == UAP.CommandEnum.DATA:
                 self.messageRecieveEvent(msg.message)
 
-    def Exit(self, force = False):
+    def Goodbye(self):
+        """
+        Send a goodbye packet to the server prompting an exit
+        """
         self.SetState(SessionClient.State.CLOSING)
         self.EnqueuePacket(Message(
             UAP.CommandEnum.GOODBYE,
@@ -176,8 +187,3 @@ class SessionClient(Network.Client):
             self.sID,
             ""
         ))
-        super().Exit(force)
-
-        
-
-    
