@@ -1,4 +1,5 @@
 import random
+from TermUI.EventBus import EventBus
 
 vector = tuple[int, int]
 
@@ -8,7 +9,6 @@ class Direction:
     RIGHT = (1, 0)
     UP = (0, -1)
     DOWN = (0, 1)
-
 
 class SnakePiece:
 
@@ -28,55 +28,27 @@ class SnakePiece:
             } [self.direction]
         else:
             return "O"
+        
+class Snake:
 
-class SnakeGame:
-
-    FRUIT = "◍"
-
-    def __init__(self, x_max : int, y_max : int, stepTime : float = 0.07):
-        self.max = (x_max, y_max)
-
-        head = SnakePiece((x_max//2, y_max//2), Direction.RIGHT, True)
-        self.snake = [head]
-            # [ head, b1, b2, b3 ..... ]
-
-        self.fruit = None
-
+    def __init__(self, position : vector, direction : Direction, game):
+        self.body : list[SnakePiece] = [SnakePiece(position, direction, True)]
         self.inputDirection = None
 
-        self.stepTime = stepTime
+        self.FruitEatEvent = EventBus()
+        self.TailEatEvent = EventBus()
+
+        self.game = game
+
         self.timeElapsed = 0
 
-
-    def Turn(self, direction : Direction):
-        self.inputDirection = direction
-        
     def Update(self, dt : float):
-        self.UpdateSnake(dt)
-        self.UpdateFruit()
-        self.HandleTailCut()
-
-    def HandleTailCut(self):
-        head = self.snake[0]
-
-        for i in range(len(self.snake) - 1):
-            if head.position == self.snake[i+1].position:
-                self.snake = self.snake[:i]
-                return
-
-    def Wrap(self, pos : vector) -> vector:
-        x, y = pos
-        x_max, y_max = self.max
-
-        return (x%x_max, y%y_max)
-
-    def UpdateSnake(self, dt : float):
         self.timeElapsed += dt
 
-        stepTime = self.stepTime
+        stepTime = self.game.stepTime
 
 
-        head = self.snake[0]
+        head = self.body[0]
 
         x, y = head.position
         dx, dy = head.direction
@@ -95,19 +67,81 @@ class SnakeGame:
         self.timeElapsed = 0
         self.inputDirection = None
 
-        x_new, y_new = self.Wrap((x + dx, y + dy))
+        x_new, y_new = self.game.Wrap((x + dx, y + dy))
 
         newHead = SnakePiece((x_new, y_new), newDirection, True)
         head.isHead = False
 
-        self.snake = [newHead] + self.snake
+        self.body = [newHead] + self.body
 
-        if self.fruit:
-            if (x_new, y_new) == self.fruit:
-                self.fruit = None
+        if self.game.fruit:
+            if (x_new, y_new) == self.game.fruit:
+                self.game.fruit = None # Not the rigfht way to do this
+                self.FruitEatEvent()
 
             else:
-                self.snake.pop()
+                self.body.pop()
+
+        self.HandleTailCut()
+
+    def HandleTailCut(self):
+        head = self.body[0]
+
+        for i in range(len(self.body) - 1):
+            if head.position == self.body[i+1].position:
+                self.body = self.body[:i]
+                self.TailEatEvent()
+                return
+            
+    def Turn(self, direction : Direction):
+        self.inputDirection = direction
+
+
+
+class SnakeGame:
+
+    FRUIT = "◍"
+
+    def __init__(self, x_max : int, y_max : int, stepTime : float = 0.07):
+        self.max = (x_max, y_max)
+
+        self.fruit = None
+
+        self.stepTime = stepTime
+
+        self.snakes : dict[str, Snake] = {}
+
+    def GetFreeSpot(self):
+        for x in range(self.max[0]):
+            for y in range(self.max[1]):
+                if self.fruit == (x,y):
+                    continue
+                for snake in self.snakes.values():
+                    for piece in snake.body:
+                        if piece.position == (x,y):
+                            continue
+                return (x,y)
+
+    def NewSnake(self, name : str) -> Snake:
+        snake = Snake(self.GetFreeSpot(), Direction.RIGHT, self)
+        self.snakes[name] = snake
+        return snake
+
+    def Turn(self, name : str, direction : Direction):
+        self.snakes[name].Turn(direction)
+        
+    def Update(self, dt : float):
+        for snake in self.snakes.values():
+            snake.Update(dt)
+        self.UpdateFruit()
+
+    
+
+    def Wrap(self, pos : vector) -> vector:
+        x, y = pos
+        x_max, y_max = self.max
+
+        return (x%x_max, y%y_max)
 
 
     def UpdateFruit(self):

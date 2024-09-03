@@ -20,6 +20,8 @@ class ServerElement(TUIWindowElement):
 
         self.server.newSessionEvent += self.RegisterSession
         self.server.sessionCloseEvent += self.DeRegisterSession
+
+        self.show = True
         
 
     def RegisterSession(self, sID):
@@ -44,6 +46,7 @@ class ServerElement(TUIWindowElement):
         self.serverThread.start()
 
     def Render(self):
+        if not self.show: return
         if self.drawBorder: self.window.border()
         y = 1
         max_y, max_x = self.window.getmaxyx()
@@ -69,6 +72,8 @@ class ClientElement(TUIWindowElement):
 
         self.client.messageRecieveEvent += self.UpdateMessageBuffer
 
+        self.show = True
+
     def UpdateMessageBuffer(self, msg):
         self.buffer = msg
         self.Rerender()
@@ -81,6 +86,7 @@ class ClientElement(TUIWindowElement):
         self.clientThread.start()
 
     def Render(self):
+        if not self.show: return
         if self.drawBorder: self.window.border()
         _, max_x = self.window.getmaxyx()
         self.window.addnstr(0, 0, f"Connected to {self.client.host}:{self.client.port}", max_x)
