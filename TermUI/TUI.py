@@ -24,7 +24,7 @@ class ColorPairs:
     i = 1
     isInvert = False
 
-    def AddPair(fg, bg) -> int:
+    def AddPair(fg, bg = curses.COLOR_BLACK) -> int:
         ColorPairs.i += 1
         ColorPairs.PAIRS.append((ColorPairs.i, fg, bg))
         return ColorPairs.i

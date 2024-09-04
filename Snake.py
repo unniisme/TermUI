@@ -31,16 +31,19 @@ class SnakePiece:
         
 class Snake:
 
-    def __init__(self, position : vector, direction : Direction, game):
+    def __init__(self, name : str, position : vector, direction : Direction, game):
+        self.name = name
+        
         self.body : list[SnakePiece] = [SnakePiece(position, direction, True)]
         self.inputDirection = None
 
         self.FruitEatEvent = EventBus()
-        self.TailEatEvent = EventBus()
 
         self.game = game
 
         self.timeElapsed = 0
+
+        self.color = None # to be used externally
 
     def Update(self, dt : float):
         self.timeElapsed += dt
@@ -78,31 +81,22 @@ class Snake:
             if (x_new, y_new) == self.game.fruit:
                 self.game.fruit = None # Not the rigfht way to do this
                 self.FruitEatEvent()
-
-            else:
-                self.body.pop()
-
-        self.HandleTailCut()
-
-    def HandleTailCut(self):
-        head = self.body[0]
-
-        for i in range(len(self.body) - 1):
-            if head.position == self.body[i+1].position:
-                self.body = self.body[:i]
-                self.TailEatEvent()
                 return
-            
+
+        self.body.pop()
+
     def Turn(self, direction : Direction):
         self.inputDirection = direction
 
+    def __str__(self):
+        return "".join([str(p) for p in self.body])
 
 
 class SnakeGame:
 
     FRUIT = "◍"
 
-    def __init__(self, x_max : int, y_max : int, stepTime : float = 0.07):
+    def __init__(self, x_max : int, y_max : int, stepTime : float = 0.1):
         self.max = (x_max, y_max)
 
         self.fruit = None
@@ -110,6 +104,8 @@ class SnakeGame:
         self.stepTime = stepTime
 
         self.snakes : dict[str, Snake] = {}
+
+        self.TailEatEvent = EventBus()
 
     def GetFreeSpot(self):
         for x in range(self.max[0]):
@@ -123,7 +119,7 @@ class SnakeGame:
                 return (x,y)
 
     def NewSnake(self, name : str) -> Snake:
-        snake = Snake(self.GetFreeSpot(), Direction.RIGHT, self)
+        snake = Snake(name, self.GetFreeSpot(), Direction.RIGHT, self)
         self.snakes[name] = snake
         return snake
 
@@ -134,6 +130,22 @@ class SnakeGame:
         for snake in self.snakes.values():
             snake.Update(dt)
         self.UpdateFruit()
+        self.HandleTailCut()
+
+    def HandleTailCut(self):
+        bodies = []
+        for snake in self.snakes.values():
+            for i, piece in enumerate(snake.body[1:]):
+                bodies.append((i + 1, piece, snake))
+        
+        for snake in self.snakes.values():
+            head = snake.body[0]
+
+            for i, piece, targetSnake in bodies:
+                if head.position == piece.position:
+                    l = len(targetSnake.body)
+                    targetSnake.body = targetSnake.body[:i]
+                    self.TailEatEvent(snake, targetSnake, l-i)
 
     
 

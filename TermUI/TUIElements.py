@@ -58,7 +58,7 @@ class TextElement(TUIWindowElement):
         BOTTOM = -2
 
     def __init__(self, x, y, width, height, drawBorder = False, 
-                 text : str = "", wrap : bool = False,
+                 text : str = "", wrap : bool = False, attr = 1,
                  horizontalAlignment : Alignment = 1, verticalAlignment : Alignment = -1):
         super().__init__(x, y, width, height, drawBorder = False)
 
@@ -66,6 +66,7 @@ class TextElement(TUIWindowElement):
         self.wrap = wrap  # TODO
         self.horizontalAlignment = horizontalAlignment
         self.verticalAlignment = verticalAlignment
+        self.attr = attr
 
     def Text(self, t : str):
         self.text = t
@@ -86,4 +87,4 @@ class TextElement(TUIWindowElement):
             text = self.text[(n-width)//2:(n+width)//2]
             i = (width - n)//2
 
-        self.window.addnstr(0, i , text, width)
+        self.window.addnstr(0, i , text, width, self.attr)
