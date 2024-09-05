@@ -9,7 +9,7 @@ from .TUIElements import TUIWindowElement
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename='logs/TUI.log',
+    filename='TUI.log',
     encoding='utf-8',
     level=logging.DEBUG,
     format='[%(name)-8s][ %(levelname)7s ] %(message)s'
