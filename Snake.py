@@ -31,7 +31,7 @@ class SnakePiece:
         
 class Snake:
 
-    def __init__(self, name : str, position : vector, direction : Direction, game):
+    def __init__(self, name : str, position : vector, direction : Direction, game, color = None):
         self.name = name
         
         self.body : list[SnakePiece] = [SnakePiece(position, direction, True)]
@@ -43,7 +43,7 @@ class Snake:
 
         self.timeElapsed = 0
 
-        self.color = None # to be used externally
+        self.color = color # to be used externally
 
     def Update(self, dt : float):
         self.timeElapsed += dt

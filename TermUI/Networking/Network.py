@@ -91,7 +91,7 @@ class Client:
 
     def RecievePacket(self):
         with self.recieveLock:
-            data, _ = self.client_socket.recvfrom(1024)
+            data, _ = self.client_socket.recvfrom(65535)
         if data:
             self.HandlePacket(data)
     

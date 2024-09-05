@@ -1,25 +1,12 @@
-class TUIScreen:
-    def __init__(self, 
-                 x, 
-                 y,
-                 max_x,
-                 max_y,
-                dt):
-        self.x = x
-        self.y = y
-        self.max_x = max_x
-        self.max_y = max_y
-        self.dt = dt
-
-
 class TUIElement:
 
     def __init__(self):
         self.window = None # for use by handler
-        pass
+        self.children : list[TUIElement] = []
 
-    def Init(self, scr : TUIScreen):
-        pass
+    def Init(self):
+        for child in self.children:
+            child.Init()
 
     def GetRender(self) -> dict[tuple, tuple]:
         """
@@ -28,14 +15,18 @@ class TUIElement:
         """
         return {}
 
-    def main(self, scr : TUIScreen):
+    def main(self, dt : float):
         """
         Called every few seconds
         """
-        pass
+        for child in self.children:
+            child.main(dt)
 
     def Rerender(self):
         """
         Call when ui is updated
         """
         pass
+
+    def AddChild(self, child):
+        self.children.append(child)

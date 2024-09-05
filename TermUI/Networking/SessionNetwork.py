@@ -54,15 +54,18 @@ class SessionServer(Network.Server):
     
     def __init__(self, host = "0.0.0.0", 
                  port=Network.DEFAULT_PORT_SERVER,
-                 logger=default_logger):
+                 logger=default_logger,
+                 max_sessions = 5):
         super().__init__(host, port)
         self.logger = logger
 
         self.sessions : dict[int, Session] = {}
+        self.max_sessions = max_sessions
 
         self.newSessionEvent = EventBus()
         self.sessionCloseEvent = EventBus()
 
+        self.sendLock = threading.Lock()       
 
     def DecodePacket(self, data: bytes) -> Message:
         return DecodeMessage(data)
@@ -73,6 +76,8 @@ class SessionServer(Network.Server):
         self.logger.debug(msg)
 
         if msg.command == UAP.CommandEnum.HELLO:
+            if len(self.sessions) > self.max_sessions:
+                return # TODO : Send a return packet with reason
 
             session = Session(clientAddr)
             self.sessions[msg.sID] = session
@@ -105,7 +110,15 @@ class SessionServer(Network.Server):
             message
         )
 
-        self.server_socket.sendto(msg.EncodeMessage(), clientAddr)
+        with self.sendLock:
+            self.server_socket.sendto(msg.EncodeMessage(), clientAddr)
+    
+    def SendToAllSessions(self, message : str):
+        sessions = self.sessions.copy()
+        for sID in sessions:
+            sendThread = threading.Thread(target = self.SendMessageToSession, args=(sID, message))
+            sendThread.daemon = True
+            sendThread.start()
 
 
 class SessionClient(Network.Client):
