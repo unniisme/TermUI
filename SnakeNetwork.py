@@ -84,6 +84,7 @@ class SnakeServerTUI(SnakeGameTUI):
         super().Init()
 
         self.serverUI.server.newSessionEvent += self.NewSnakeSession
+        self.serverUI.server.sessionCloseEvent += self.KillSnakeSession
 
     def main(self, dt):
         super().main(dt)
@@ -94,6 +95,9 @@ class SnakeServerTUI(SnakeGameTUI):
         self.game.NewSnake(str(sID))
         self.game.snakes[str(sID)].color = SNAKECOLORS[len(self.serverUI.server.sessions) - 1]
         self.serverUI.server.sessions[sID].recieveEvent += lambda msg : self.SnakeController(sID, msg)
+
+    def KillSnakeSession(self, sID):
+        self.game.KillSnake(str(sID))
 
     def SnakeController(self, sID, msg):
         d = InputState.GetDirection(msg)
@@ -129,3 +133,4 @@ class SnakeClientTUI(SnakeGameTUI):
 
     def main(self, dt):
         pass # updated by server requests
+

@@ -10,10 +10,10 @@ class ServerElement(TUIWindowElement):
     """
 
     def __init__(self, x, y, width, height, drawBorder = False,
-                 host = "0.0.0.0", server_port = 8800):
+                 host = None, server_port = 8800, ipv6 = False):
         super().__init__(x, y, width, height, drawBorder)
 
-        self.server = SessionServer(host, server_port)
+        self.server = SessionServer(host, server_port, ipv6 = ipv6)
         self.serverThread = None
 
         self.sessionMessageBuffer = {}
@@ -62,11 +62,11 @@ class ServerElement(TUIWindowElement):
 class ClientElement(TUIWindowElement):
 
     def __init__(self, x, y, width, height, drawBorder = False,
-                 host = "0.0.0.0", server_port = 8800, client_port = 6600):
+                 host = None, server_port = 8800, client_port = 6600, ipv6 = False):
         
         super().__init__( x, y, width, height, drawBorder)
 
-        self.client = SessionClient(host, server_port, client_port)
+        self.client = SessionClient(host, server_port, client_port, ipv6=ipv6)
         self.clientThread = None
         self.buffer = ""
 
@@ -91,5 +91,8 @@ class ClientElement(TUIWindowElement):
         _, max_x = self.window.getmaxyx()
         self.window.addnstr(0, 0, f"Connected to {self.client.host}:{self.client.port}", max_x)
         self.window.addnstr(1, 0, self.buffer, max_x)
+
+    def Quit(self):
+        self.client.Goodbye()
         
 

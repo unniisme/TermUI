@@ -187,5 +187,12 @@ class TUI:
             logging.error(f"Main thread crashed with error {e}")
             raise e
         
+        self.Quit()
         self.stdscr.clear()
         curses.endwin()
+
+    def Quit(self):
+        with self.writeLock:
+            self.running = self.rendering = self.takingInput = False
+        for element in self.Elements:
+            element.Quit()

@@ -5,7 +5,7 @@ import curses
 import sys
 
 
-host = "0.0.0.0"
+host = "::"
 port = 8800
 recv_port = 6600
 
@@ -18,7 +18,7 @@ if '--recvport' in sys.argv:
 
 tui = TUI()
 
-client = ClientElement(0, 0, 10, 1, host=host, server_port=port, client_port=recv_port)
+client = ClientElement(0, 0, 10, 1, host=host, server_port=port, client_port=recv_port, ipv6=True)
 client.show = False
 game = SnakeClientTUI(2, 2, 40, 20, client, drawBorder=True)
 

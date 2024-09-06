@@ -7,10 +7,18 @@ DEFAULT_PORT_CLIENT = 6600
 
 class Server:
 
-    def __init__(self, host = "0.0.0.0", port=DEFAULT_PORT_SERVER):
-        self.host = host
+    def __init__(self, host = None, port=DEFAULT_PORT_SERVER, ipv6 = False):
         self.port = port
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        socketFamily = socket.AF_INET
+        if ipv6:
+            socketFamily = socket.AF_INET6
+            if not host:
+                host = "::"
+        if not host: host = "0.0.0.0"
+            
+
+        self.host = host
+        self.server_socket = socket.socket(socketFamily, socket.SOCK_DGRAM)
         self.server_socket.bind((host, port))
 
         self.running = False
@@ -56,11 +64,18 @@ class Server:
 
 
 class Client:
-    def __init__(self, host, port=DEFAULT_PORT_SERVER, recieve_port=DEFAULT_PORT_CLIENT):
+    def __init__(self, host, port=DEFAULT_PORT_SERVER, recieve_port=DEFAULT_PORT_CLIENT, ipv6 = False):
         self.host = host
         self.port = port
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.client_socket.bind(('0.0.0.0', recieve_port))
+
+        clientHost = "0.0.0.0"
+        socketFamily = socket.AF_INET
+        if ipv6:
+            clientHost = "::"
+            socketFamily = socket.AF_INET6
+
+        self.client_socket = socket.socket(socketFamily, socket.SOCK_DGRAM)
+        self.client_socket.bind((clientHost, recieve_port))
         self.client_socket.connect((host, port))
 
         self.sendLock = threading.Lock()

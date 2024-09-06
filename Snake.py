@@ -122,6 +122,11 @@ class SnakeGame:
         snake = Snake(name, self.GetFreeSpot(), Direction.RIGHT, self)
         self.snakes[name] = snake
         return snake
+    
+    def KillSnake(self, name):
+        if name in self.snakes:
+            del self.snakes[name]
+            return
 
     def Turn(self, name : str, direction : Direction):
         self.snakes[name].Turn(direction)

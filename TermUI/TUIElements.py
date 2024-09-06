@@ -47,6 +47,9 @@ class TUIWindowElement(TUIElement):
         """
         pass
 
+    def Quit(self):
+        pass
+
 
 class TextElement(TUIWindowElement):
 

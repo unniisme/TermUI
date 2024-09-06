@@ -52,11 +52,12 @@ def DecodeMessage(data : bytes) -> Message:
 
 class SessionServer(Network.Server):
     
-    def __init__(self, host = "0.0.0.0", 
+    def __init__(self, host = None, 
                  port=Network.DEFAULT_PORT_SERVER,
                  logger=default_logger,
-                 max_sessions = 5):
-        super().__init__(host, port)
+                 max_sessions = 5,
+                 ipv6 = False):
+        super().__init__(host, port, ipv6)
         self.logger = logger
 
         self.sessions : dict[int, Session] = {}
@@ -97,6 +98,7 @@ class SessionServer(Network.Server):
             self.logger.info(f"Session {msg.sID} closing")
             self.sessions[msg.sID].Exit()
             self.sessionCloseEvent(msg.sID)
+            del self.sessions[msg.sID]
 
     def SendMessageToSession(self, sID, message : str):
         if sID not in self.sessions:
@@ -131,8 +133,9 @@ class SessionClient(Network.Client):
     def __init__(self, host, 
                  port=Network.DEFAULT_PORT_SERVER, 
                  recieve_port=Network.DEFAULT_PORT_CLIENT,
-                 logger=default_logger):
-        super().__init__(host, port, recieve_port)
+                 logger=default_logger,
+                 ipv6 = False):
+        super().__init__(host, port, recieve_port, ipv6)
         self.logger = logger
 
         self.sID = random.getrandbits(32)
